@@ -1,16 +1,41 @@
-Python Scanner class for scanning (lexical analysis of) strings.
+# Scanner #
 
-The class is styled after Ruby's StringScanner, but is not 100% the same.
+Python Scanner class for scanning (i.e. lexical analysis of) strings. The class
+is styled after Ruby's StringScanner, but is not 100% the same. For usage, 
+see docs/scanner.html which contains HTML API docs, or use PyDoc.
 
-For usage, see docs/scanner.html which contains HTML API docs, or use PyDoc.
+## Examples ##
+### Simple ###
+Parsing a simple date format:
+
+    scanner = Scanner('09/3/2011 12:15:45')
+    day = scanner.scan(r'\d+') # -> '09'
+    scanner.get() #   -> /
+    month = scanner.scan(r'\d+') # -> '3'
+    scanner.get() # -> /
+    year = scanner.scan(r'\d+') # -> '2011'
+    scanner.scan(r'\s+') # -> ' '
+
+    hour = scanner.scan(r'\d+') # -> '12'
+    scanner.get() #   -> :
+    minute = scanner.scan(r'\d+') # -> '15'
+    scanner.get() # -> :
+    second = scanner.scan(r'\d+') # -> '45'
+
+    print (day, month, year, hour, minute, second) # -> ('09', '3', '2011', '12', '15', '45')
+
 
 For non-trivial examples, see in the examples/ directory:
-  json.py - a full (but error-intolerant) JSON parser using the obvious 
+
+  * json.py - a full (but error-intolerant) JSON parser using the obvious 
     recursive descent approach. Scanner is used to power the 'does this match?'
     bits, but this is a non-trivial program in itself.
-  javascript.py - A simple JavaScript tokenizer using Scanner. Its relation to 
+  * javascript.py - A simple JavaScript tokenizer using Scanner. Its relation to 
     Scanner is very close (very little is done except using Scanner's methods), 
     so this is a good one to look at first.
+
+## License ##
+Scanner is licensed under the new BSD license.
     
 
 http://asgaard.co.uk/p/Python-StringScanner
