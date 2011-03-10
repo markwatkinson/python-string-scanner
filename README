@@ -1,0 +1,17 @@
+Python Scanner class for scanning (lexical analysis of) strings.
+
+The class is styled after Ruby's StringScanner, but is not 100% the same.
+
+For usage, see docs/scanner.html which contains HTML API docs, or use PyDoc.
+
+For non-trivial examples, see in the examples/ directory:
+  json.py - a full (but error-intolerant) JSON parser using the obvious 
+    recursive descent approach. Scanner is used to power the 'does this match?'
+    bits, but this is a non-trivial program in itself.
+  javascript.py - A simple JavaScript tokenizer using Scanner. Its relation to 
+    Scanner is very close (very little is done except using Scanner's methods), 
+    so this is a good one to look at first.
+    
+
+http://asgaard.co.uk/p/Python-StringScanner
+https://github.com/markwatkinson/python-string-scanner

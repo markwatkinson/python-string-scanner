@@ -1,0 +1,205 @@
+<dl>
+<dt>class Scanner</dt>
+<h1>About</h1>
+<dd>
+<pre>A simple class to aid in lexical analysis of a <a href="#string">string</a>.
+Styled after, but not entirely the same as, Ruby's StringScanner class.
+
+Basic philosophy is simple: Scanner traverses a <a href="#string">string</a> left to right,
+consuming the <a href="#string">string</a> as it goes. The current position is the <a href="#string">string</a> pointer
+Scanner.<a href="#pos">pos</a>. At each iteration, the caller uses the scanning methods to 
+determine what the current piece of <a href="#string">string</a> actually is.
+
+Scanning methods:
+  With the exception of <a href="#get">get</a> and <a href="#peek">peek</a>, all scanning methods take a pattern and
+  (optionally) flags (e.g re.X). The patterns are assumed to be either 
+  strings or compiled regular expression objects (i.e. the result of 
+  re.compile, or equivalent). If a pattern is not a <a href="#string">string</a> but does not 
+  implement <a href="#match">match</a> or search (whichever is being used), a ValueError is raised.
+  String patterns are compiled and cached internally.
+  
+  The <a href="#check">check</a>, <a href="#scan">scan</a> and <a href="#skip">skip</a> methods all try to <a href="#match">match</a> *at* the current <a href="#scan">scan</a>
+  pointer. <a href="#check_to">check_to</a>, <a href="#scan_to">scan_to</a> and <a href="#skip_to">skip_to</a> all try to find a <a href="#match">match</a> somewhere
+  beyond the <a href="#scan">scan</a> pointer and jump *to* that position. <a href="#check_until">check_until</a>, <a href="#scan_until">scan_until</a>,
+  and <a href="#skip_until">skip_until</a> are like *_to, but also consume the <a href="#match">match</a> (so the jump to
+  the *end* of that position)
+  
+  Lookahead:
+    <a href="#check">check</a>()
+    <a href="#check_to">check_to</a>()
+    <a href="#check_until">check_until</a>()
+    <a href="#peek">peek</a>()
+    
+  Consume:
+    <a href="#get">get</a>()
+    <a href="#scan">scan</a>()
+    <a href="#scan_to">scan_to</a>()
+    <a href="#scan_until">scan_until</a>()      
+    <a href="#skip">skip</a>()
+    <a href="#skip_to">skip_to</a>()
+    <a href="#skip_until">skip_until</a>()
+    <a href="#skip_bytes">skip_bytes</a>()      (convenience wrapper)
+    <a href="#skip_lines">skip_lines</a>()      (convenience wrapper)
+    <a href="#skip_whitespace">skip_whitespace</a>() (convenience wrapper)
+    
+  Note that <a href="#scan">scan</a>* and <a href="#check">check</a>* both return either a <a href="#string">string</a>, in the case of a
+  <a href="#match">match</a>, or None, in the case of no <a href="#match">match</a>. If the <a href="#match">match</a> <a href="#exists">exists</a> but is zero
+  length, the empty <a href="#string">string</a> is returned. Be careful handling this as both 
+  None and the empty <a href="#string">string</a> evaluate to False, but mean very different things.
+  
+  <a href="#peek">peek</a> and <a href="#get">get</a> also return the empty <a href="#string">string</a> when the end of the stream is 
+  reached.
+  
+    
+Most recent <a href="#match">match</a> data:
+  
+  <a href="#matched">matched</a>() -- True/False - was the most recent <a href="#match">match</a> a success?
+  
+  The following methods all throw Exception if not <a href="#matched">matched</a>()
+  
+  <a href="#match">match</a>() -- <a href="#matched">matched</a> <a href="#string">string</a>
+  <a href="#match_len">match_len</a>() -- <a href="#matched">matched</a> <a href="#string">string</a> length
+  <a href="#match_pos">match_pos</a>() -- offset of <a href="#match">match</a>
+  
+  Wrappers around re.*
+  <a href="#match_info">match_info</a>()  -- the re.MatchObject
+  <a href="#match_group">match_group</a>()
+  <a href="#match_groups">match_groups</a>()
+  <a href="#match_groupdict">match_groupdict</a>()
+  
+  <a href="#pre_match">pre_match</a>() -- <a href="#string">string</a> preceding the <a href="#match">match</a>
+  <a href="#post_match">post_match</a>() -- <a href="#string">string</a> following the <a href="#match">match</a>
+  
+Misc:
+  <a href="#pos">pos</a> -- <a href="#get">get</a>/set current <a href="#scan">scan</a> pointer position
+  
+  <a href="#bol">bol</a>() -- beginning of line? (DOS/Unix/Mac aware)
+  <a href="#eol">eol</a>() -- end of line? (DOS/Unix/Mac aware)
+  <a href="#eos">eos</a>() -- end of <a href="#string">string</a>?
+  <a href="#rest">rest</a>() -- remaining (unconsumed) <a href="#string">string</a>
+  <a href="#rest_len">rest_len</a>() -- length of remaining <a href="#string">string</a>
+  <a href="#unscan">unscan</a>() -- revert to previous state
+  
+Setup:
+  <a href="#string">string</a> -- <a href="#get">get</a>/set current source <a href="#string">string</a>
+  
+  <a href="#reset">reset</a>() -- <a href="#reset">reset</a> the scanner ready to start again
+  <a href="#terminate">terminate</a>() -- trigger premature finish  </pre>
+<h1>Properties</h1>
+<dl>
+<dt id="pos">pos</dt> <dd><pre>The current <a href="#string">string</a> pointer position.</pre></dd>
+<dt id="string">string</dt> <dd><pre>The source <a href="#string">string</a></pre></dd>
+<h1>Methods</h1>
+<dt id="__init__">__init__(src=None)</dt><dd><pre>Constructor 
+
+Arguments:
+src -- a <a href="#string">string</a> to <a href="#scan">scan</a>. This can be set later by <a href="#string">string</a>()</pre></dd>
+<dt id="bol">bol()</dt><dd><pre>Return whether or not the <a href="#scan">scan</a> pointer is immediately after a newline
+character (DOS/Unix/Mac aware), or at the start of the <a href="#string">string</a>. </pre></dd>
+<dt id="check">check(pattern, flags=0)</dt><dd><pre>Return a <a href="#match">match</a> for the pattern (or None) at the <a href="#scan">scan</a> pointer without 
+actually consuming the <a href="#string">string</a>
+If the pattern <a href="#matched">matched</a> but was zero length, the empty <a href="#string">string</a> is returned
+If the pattern did not <a href="#match">match</a>, None is returned</pre></dd>
+<dt id="check_to">check_to(pattern, flags=0)</dt><dd><pre>Return all text up until the beginning of the first <a href="#match">match</a> for the pattern 
+after the <a href="#scan">scan</a> pointer without consuming the <a href="#string">string</a>
+If the pattern <a href="#matched">matched</a> but was zero length, the empty <a href="#string">string</a> is returned
+If the pattern did not <a href="#match">match</a>, None is returned</pre></dd>
+<dt id="check_until">check_until(pattern, flags=0)</dt><dd><pre>Return all text up until the end of the first <a href="#match">match</a> for the pattern 
+after the <a href="#scan">scan</a> pointer without consuming the <a href="#string">string</a>
+If the pattern <a href="#matched">matched</a> but was zero length, the empty <a href="#string">string</a> is returned
+If the pattern did not <a href="#match">match</a>, None is returned</pre></dd>
+<dt id="eol">eol()</dt><dd><pre>Return whether or not the <a href="#scan">scan</a> pointer is immediately before a newline 
+character (DOS/Unix/Mac aware) or at the end of the <a href="#string">string</a>.</pre></dd>
+<dt id="eos">eos()</dt><dd><pre>Return True iff we are at the end of the <a href="#string">string</a>, else False.</pre></dd>
+<dt id="exists">exists(pattern, flags=0)</dt><dd><pre>Return True if the given pattern matches ANYWHERE after the <a href="#scan">scan</a> 
+pointer. Don't advance the <a href="#scan">scan</a> pointer</pre></dd>
+<dt id="get">get(length=1)</dt><dd><pre>Return the given number of characters from the current <a href="#string">string</a> pointer 
+and consume them
+If we reach the end of the stream, the empty <a href="#string">string</a> is returned</pre></dd>
+<dt id="location">location()</dt><dd><pre>Return as a tuple: (linenumber, bytenumber) </pre></dd>
+<dt id="match">match()</dt><dd><pre>Return the last matching <a href="#string">string</a>
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed</pre></dd>
+<dt id="match_group">match_group(*args)</dt><dd><pre>Return the contents of the given group in the most recent <a href="#match">match</a>.
+This is a wrapper to re.MatchObject.group()
+raise IndexError if the <a href="#match">match</a> <a href="#exists">exists</a> but the group does not
+raise Exception if no <a href="#match">match</a> attempts have been recorded
+raise Exception if most recent <a href="#match">match</a> failed</pre></dd>
+<dt id="match_groupdict">match_groupdict(default=None)</dt><dd><pre>Return a dict containing group_name =&gt; <a href="#match">match</a>. This is a wrapper to
+re.MatchObject.groupdict() and as such it only works for named groups
+
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed</pre></dd>
+<dt id="match_groups">match_groups(default=None)</dt><dd><pre>Return the most recent's <a href="#match">match</a>'s groups, this is a wrapper to 
+re.MatchObject.groups()
+
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed</pre></dd>
+<dt id="match_info">match_info()</dt><dd><pre>Return the most recent <a href="#match">match</a>'s MatchObject. This is what's returned by
+the re module. Use this if the other methods here don't expose what you 
+need.
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed</pre></dd>
+<dt id="match_len">match_len()</dt><dd><pre>Return the length of the last matching <a href="#string">string</a>
+This is equivalent to len(scanner.<a href="#match">match</a>()).
+
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed    </pre></dd>
+<dt id="match_pos">match_pos()</dt><dd><pre>Return the offset into the <a href="#string">string</a> of the last <a href="#match">match</a>
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.
+Raise Exception if most recent <a href="#match">match</a> failed    </pre></dd>
+<dt id="matched">matched()</dt><dd><pre>Return True if the last <a href="#match">match</a> was successful, else False.
+Raise Exception if no <a href="#match">match</a> attempts have been recorded.</pre></dd>
+<dt id="peek">peek(length=1)</dt><dd><pre>Return the given number of characters from the current <a href="#string">string</a> pointer
+without consuming them.
+If we reach the end of the stream, the empty <a href="#string">string</a> is returned</pre></dd>
+<dt id="post_match">post_match()</dt><dd><pre>Return the <a href="#string">string</a> following the last <a href="#match">match</a> or None. This is equivalent 
+to:  scanner.<a href="#string">string</a>[scanner.<a href="#match_pos">match_pos</a>() + scanner.<a href="#match_len">match_len</a>() : ]
+
+raise Exception if no <a href="#match">match</a> attempts have been recorded</pre></dd>
+<dt id="pre_match">pre_match()</dt><dd><pre>Return the <a href="#string">string</a> preceding the last <a href="#match">match</a> or None. This is equivalent 
+to:  scanner.<a href="#string">string</a>[:scanner.<a href="#match_pos">match_pos</a>()]
+
+raise Exception if no <a href="#match">match</a> attempts have been recorded</pre></dd>
+<dt id="reset">reset()</dt><dd><pre>Reset the scanner's state including <a href="#string">string</a> pointer and <a href="#match">match</a> history.</pre></dd>
+<dt id="rest">rest()</dt><dd><pre>Return the <a href="#string">string</a> from the current pointer onwards, i.e. the segment of 
+<a href="#string">string</a> which has not yet been consumed.</pre></dd>
+<dt id="rest_len">rest_len()</dt><dd><pre>Return the length of <a href="#string">string</a> remaining. 
+This is equivalent to len(<a href="#rest">rest</a>())</pre></dd>
+<dt id="scan">scan(pattern, flags=0)</dt><dd><pre>Return a <a href="#match">match</a> for the pattern at the <a href="#scan">scan</a> pointer and consume the 
+<a href="#string">string</a>.
+Return None if not <a href="#match">match</a> is found</pre></dd>
+<dt id="scan_to">scan_to(pattern, flags=0)</dt><dd><pre>Return all text up until the beginning of the first <a href="#match">match</a> for the pattern
+after the <a href="#scan">scan</a> pointer.
+The pattern is not included in the <a href="#match">match</a>.
+The <a href="#scan">scan</a> pointer will be moved such that it immediately precedes the pattern
+Return None if no <a href="#match">match</a> is found</pre></dd>
+<dt id="scan_until">scan_until(pattern, flags=0)</dt><dd><pre>Return the first <a href="#match">match</a> for the pattern after the <a href="#scan">scan</a> pointer and 
+consumes the <a href="#string">string</a> up until the end of the <a href="#match">match</a>.    
+Return None if no <a href="#match">match</a> is found</pre></dd>
+<dt id="skip">skip(pattern, flags=0)</dt><dd><pre>Scan ahead over the given pattern and return how many characters were
+consumed, or None.
+Similar to <a href="#scan">scan</a>, but does not return the <a href="#string">string</a> or record the <a href="#match">match</a> </pre></dd>
+<dt id="skip_bytes">skip_bytes(n)</dt><dd><pre>Skip the given number of bytes and return the number of bytes consumed</pre></dd>
+<dt id="skip_lines">skip_lines(n=1)</dt><dd><pre>Skip the given number of lines and return the number of lines consumed </pre></dd>
+<dt id="skip_to">skip_to(pattern, flags=0)</dt><dd><pre>Scan ahead until the beginning of first occurrance of the given pattern
+and return how many characters were skipped, or None if the <a href="#match">match</a>
+failed
+The <a href="#match">match</a> is not recorded.</pre></dd>
+<dt id="skip_until">skip_until(pattern, flags=0)</dt><dd><pre>Scan ahead until the end of first occurrance of the given pattern and 
+return how many characters were consumed, or None if the <a href="#match">match</a> failed
+The <a href="#match">match</a> is not recorded</pre></dd>
+<dt id="skip_whitespace">skip_whitespace(n=None, multiline=True)</dt><dd><pre>Skip over whitespace characters and return the number of characters 
+consumed
+
+Arguments: 
+n -- maximum number of characters to cosume (default None)
+multiline -- whether or not to consume newline characters (default True)</pre></dd>
+<dt id="terminate">terminate()</dt><dd><pre>Set the <a href="#string">string</a> pointer to the end of the input and clear the <a href="#match">match</a> 
+history.</pre></dd>
+<dt id="unscan">unscan()</dt><dd><pre>Revert the scanner's state to that of the previous <a href="#match">match</a>. Only one 
+previous state is remembered
+Throw Exception if there is no previous known state to restore</pre></dd>
+</dl>
+</dd>
+</dl>
