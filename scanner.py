@@ -546,8 +546,9 @@ class Scanner(object):
     
   def exists(self, pattern, flags=0):
     """ Return True if the given pattern matches ANYWHERE after the scan 
-    pointer. Don't advance the scan pointer"""
-    return self.check_to(pattern, flags) is not None
+    pointer. Don't advance the scan pointer or record the match"""
+    return self.__check(pattern, flags, consume=False, log=False,
+      search_func='search') is not None
     
   def peek(self, length=1):
     """Return the given number of characters from the current string pointer

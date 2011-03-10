@@ -284,10 +284,18 @@ line8'''
     
     self.skip_lines(3)
     assert self.location() == (5, 1)
-    pos = self.pos 
+    
+    # get something in the match history
+    self.scan('.')    
+    pos = self.pos    
+    matched = (self.matched(), self.match_pos())
+    
     assert self.exists('line7')
-    assert self.pos == pos
+    assert self.pos == pos    
     assert not self.exists('line70')
+    assert matched ==  (self.matched(), self.match_pos())
+    
+    
     
 
 s = ScannerTest()
